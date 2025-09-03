@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
-import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, onSnapshot } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { FAQ } from '../types';
 import { FAQ_COLLECTION } from '../constants';
@@ -18,15 +17,20 @@ const UserView: React.FC = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   useEffect(() => {
-    // Use server-side sorting by category to ensure consistent order and to
-    // address potential data loading issues in the public view.
-    const q = query(collection(db, FAQ_COLLECTION), orderBy('category'));
+    // Removed server-side orderBy to prevent potential permission/indexing issues
+    // for unauthenticated users. Sorting is now handled on the client.
+    const q = query(collection(db, FAQ_COLLECTION));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const faqsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FAQ));
+      
+      // Sort FAQs client-side for consistent display
+      faqsData.sort((a, b) => a.category.localeCompare(b.category) || a.question.localeCompare(b.question));
+      
       setFaqs(faqsData);
       setLoading(false);
     }, (error) => {
       console.error("Error fetching FAQs in real-time:", error);
+      alert("Could not load FAQs. The content may be unavailable at the moment.");
       setLoading(false);
     });
 
@@ -34,7 +38,9 @@ const UserView: React.FC = () => {
   }, []);
 
   const categories = useMemo(() => {
-    return ['All', ...Array.from(new Set(faqs.map(faq => faq.category)))];
+    // Create a unique, sorted list of categories from the sorted FAQs
+    const uniqueCategories = [...new Set(faqs.map(faq => faq.category))];
+    return ['All', ...uniqueCategories];
   }, [faqs]);
 
   const filteredFaqs = useMemo(() => {
