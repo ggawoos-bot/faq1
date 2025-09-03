@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { collection, query, onSnapshot } from 'firebase/firestore';
+import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { FAQ } from '../types';
 import { FAQ_COLLECTION } from '../constants';
@@ -18,21 +18,11 @@ const UserView: React.FC = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   useEffect(() => {
-    // Removed orderBy from the query to prevent potential Firestore index errors
-    // which can stop data from loading. Sorting is now handled client-side.
-    const q = query(collection(db, FAQ_COLLECTION));
+    // Use server-side sorting by category to ensure consistent order and to
+    // address potential data loading issues in the public view.
+    const q = query(collection(db, FAQ_COLLECTION), orderBy('category'));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const faqsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FAQ));
-      
-      // Sort client-side to avoid needing a composite index in Firestore
-      faqsData.sort((a, b) => {
-        if (a.category.toLowerCase() < b.category.toLowerCase()) return -1;
-        if (a.category.toLowerCase() > b.category.toLowerCase()) return 1;
-        if (a.question.toLowerCase() < b.question.toLowerCase()) return -1;
-        if (a.question.toLowerCase() > b.question.toLowerCase()) return 1;
-        return 0;
-      });
-      
       setFaqs(faqsData);
       setLoading(false);
     }, (error) => {

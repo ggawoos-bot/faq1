@@ -100,8 +100,10 @@ const AdminDashboard: React.FC = () => {
       )
     ];
     const csvString = csvRows.join('\n');
-    // Add BOM for UTF-8 Excel compatibility for non-English characters.
-    const blob = new Blob(['\uFEFF' + csvString], { type: 'text/csv;charset=utf-8;' });
+    // Correctly add BOM for UTF-8 to ensure Korean characters are not broken in Excel.
+    // Using a Uint8Array is more robust than a string literal.
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const blob = new Blob([bom, csvString], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
