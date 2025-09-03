@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { collection, query, onSnapshot } from 'firebase/firestore';
+import { collection, query, getDocs } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { FAQ } from '../types';
 import { FAQ_COLLECTION } from '../constants';
@@ -17,24 +17,29 @@ const UserView: React.FC = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   useEffect(() => {
-    // Removed server-side orderBy to prevent potential permission/indexing issues
-    // for unauthenticated users. Sorting is now handled on the client.
-    const q = query(collection(db, FAQ_COLLECTION));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const faqsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FAQ));
-      
-      // Sort FAQs client-side for consistent display
-      faqsData.sort((a, b) => a.category.localeCompare(b.category) || a.question.localeCompare(b.question));
-      
-      setFaqs(faqsData);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error fetching FAQs in real-time:", error);
-      alert("Could not load FAQs. The content may be unavailable at the moment.");
-      setLoading(false);
-    });
+    // Switched from onSnapshot to getDocs for a one-time fetch.
+    // This is often more reliable for public read-only data and can avoid
+    // potential permission issues with real-time listeners for unauthenticated users.
+    const fetchFaqs = async () => {
+      setLoading(true);
+      try {
+        const q = query(collection(db, FAQ_COLLECTION));
+        const querySnapshot = await getDocs(q);
+        const faqsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FAQ));
+        
+        // Sort FAQs client-side for consistent display
+        faqsData.sort((a, b) => a.category.localeCompare(b.category) || a.question.localeCompare(b.question));
+        
+        setFaqs(faqsData);
+      } catch (error) {
+        console.error("Error fetching FAQs:", error);
+        alert("Could not load FAQs. The content may be unavailable at the moment.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => unsubscribe();
+    fetchFaqs();
   }, []);
 
   const categories = useMemo(() => {
