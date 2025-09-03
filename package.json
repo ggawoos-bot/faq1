@@ -1,14 +1,12 @@
 {
   "name": "firestore-faq-system",
-  "homepage": "https://ggawoos-bot.github.io/faq1",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "react-dom": "^19.1.1",
