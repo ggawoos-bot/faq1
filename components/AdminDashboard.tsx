@@ -100,7 +100,8 @@ const AdminDashboard: React.FC = () => {
       )
     ];
     const csvString = csvRows.join('\n');
-    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    // Add BOM for UTF-8 Excel compatibility for non-English characters.
+    const blob = new Blob(['\uFEFF' + csvString], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
