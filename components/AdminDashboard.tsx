@@ -1,8 +1,9 @@
 
 
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-// FIX: Changed import to @firebase/firestore to be consistent and avoid module resolution errors.
-import { collection, getDocs, doc, setDoc, addDoc, updateDoc, deleteDoc, writeBatch, query, where, onSnapshot } from '@firebase/firestore';
+// FIX: Changed import from @firebase/firestore to @firebase/database to use Realtime Database.
+import { ref, onValue, set, update, remove, push } from '@firebase/database';
 import { db } from '../services/firebase';
 import { FAQ, FAQCreate } from '../types';
 import { FAQ_COLLECTION } from '../constants';
@@ -23,10 +24,18 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    const q = query(collection(db, FAQ_COLLECTION));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const faqsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FAQ));
-      setFaqs(faqsData);
+    const faqsRef = ref(db, FAQ_COLLECTION);
+    const unsubscribe = onValue(faqsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const faqsData = Object.keys(data).map(key => ({
+          id: key,
+          ...data[key]
+        }));
+        setFaqs(faqsData);
+      } else {
+        setFaqs([]);
+      }
       setLoading(false);
     }, (error) => {
       console.error("Error fetching FAQs: ", error);
@@ -65,10 +74,15 @@ const AdminDashboard: React.FC = () => {
   const handleFormSubmit = async (faqData: FAQCreate | FAQ) => {
     try {
       if ('id' in faqData) {
-        const faqDoc = doc(db, FAQ_COLLECTION, faqData.id);
-        await updateDoc(faqDoc, { ...faqData });
+        // Update existing FAQ
+        const { id, ...updateData } = faqData;
+        const faqRef = ref(db, `${FAQ_COLLECTION}/${id}`);
+        await update(faqRef, updateData);
       } else {
-        await addDoc(collection(db, FAQ_COLLECTION), faqData);
+        // Create new FAQ
+        const faqsListRef = ref(db, FAQ_COLLECTION);
+        const newFaqRef = push(faqsListRef);
+        await set(newFaqRef, faqData);
       }
       closeModal();
     } catch (error) {
@@ -80,7 +94,8 @@ const AdminDashboard: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this FAQ?")) {
       try {
-        await deleteDoc(doc(db, FAQ_COLLECTION, id));
+        const faqRef = ref(db, `${FAQ_COLLECTION}/${id}`);
+        await remove(faqRef);
       } catch (error) {
         console.error("Error deleting FAQ: ", error);
         alert("Failed to delete FAQ.");
@@ -102,8 +117,6 @@ const AdminDashboard: React.FC = () => {
       )
     ];
     const csvString = csvRows.join('\n');
-    // Correctly add BOM for UTF-8 to ensure Korean characters are not broken in Excel.
-    // Using a Uint8Array is more robust than a string literal.
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     const blob = new Blob([bom, csvString], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -147,18 +160,17 @@ const AdminDashboard: React.FC = () => {
 
       if (window.confirm(`Are you sure you want to upsert ${faqsToUpsert.length} FAQs? This may overwrite existing data.`)) {
         try {
-          const batch = writeBatch(db);
+          const updates: { [key: string]: any } = {};
           for (const faq of faqsToUpsert) {
             const { id, ...data } = faq;
-            if (id) {
-              const docRef = doc(db, FAQ_COLLECTION, id);
-              batch.set(docRef, data, { merge: true });
-            } else {
-              const docRef = doc(collection(db, FAQ_COLLECTION));
-              batch.set(docRef, data);
+            let faqId = id;
+            if (!faqId) {
+                const faqsListRef = ref(db, FAQ_COLLECTION);
+                faqId = push(faqsListRef).key!;
             }
+            updates[`/${FAQ_COLLECTION}/${faqId}`] = data;
           }
-          await batch.commit();
+          await update(ref(db), updates);
           alert('CSV data uploaded successfully!');
         } catch (error) {
           console.error("Error uploading CSV: ", error);

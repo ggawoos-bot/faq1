@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-// FIX: Changed import to @firebase/firestore to be consistent and avoid module resolution errors.
-import { collection, query, getDocs } from '@firebase/firestore';
+// FIX: Changed import from @firebase/firestore to @firebase/database to use Realtime Database.
+import { ref, get } from '@firebase/database';
 import { db } from '../services/firebase';
 import { FAQ } from '../types';
 import { FAQ_COLLECTION } from '../constants';
@@ -18,20 +18,24 @@ const UserView: React.FC = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   useEffect(() => {
-    // Switched from onSnapshot to getDocs for a one-time fetch.
-    // This is often more reliable for public read-only data and can avoid
-    // potential permission issues with real-time listeners for unauthenticated users.
     const fetchFaqs = async () => {
       setLoading(true);
       try {
-        const q = query(collection(db, FAQ_COLLECTION));
-        const querySnapshot = await getDocs(q);
-        const faqsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FAQ));
-        
-        // Sort FAQs client-side for consistent display
-        faqsData.sort((a, b) => a.category.localeCompare(b.category) || a.question.localeCompare(b.question));
-        
-        setFaqs(faqsData);
+        const faqsRef = ref(db, FAQ_COLLECTION);
+        const snapshot = await get(faqsRef);
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            const faqsData = Object.keys(data).map(key => ({
+              id: key,
+              ...data[key]
+            } as FAQ));
+            
+            faqsData.sort((a, b) => a.category.localeCompare(b.category) || a.question.localeCompare(b.question));
+            
+            setFaqs(faqsData);
+        } else {
+            setFaqs([]);
+        }
       } catch (error) {
         console.error("Error fetching FAQs:", error);
         alert("Could not load FAQs. The content may be unavailable at the moment.");

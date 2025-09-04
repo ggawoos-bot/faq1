@@ -1,8 +1,9 @@
 
 
+
 // FIX: Changed firebase imports to use @firebase scoped packages to resolve module resolution errors.
 import { initializeApp, getApps, getApp } from '@firebase/app';
-import { getFirestore } from '@firebase/firestore';
+import { getDatabase } from '@firebase/database';
 import { getAuth } from '@firebase/auth';
 
 // Your web app's Firebase configuration
@@ -20,8 +21,8 @@ const firebaseConfig = {
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 
-// Initialize Cloud Firestore and get a reference to the service
-const db = getFirestore(app);
+// Initialize Firebase Realtime Database and get a reference to the service
+const db = getDatabase(app);
 
 // Initialize Firebase Authentication and get a reference to the service
 const auth = getAuth(app);
