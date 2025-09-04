@@ -1,27 +1,29 @@
-// Fix: Correct Firebase initialization to resolve module export error.
-// The original import for 'initializeApp' was causing an error, likely due to a
-// project configuration or dependency version issue. Using the Firebase v9 compat
-// library for initialization provides a stable alternative that works seamlessly
-// with the v9 modular APIs used throughout the rest of the application.
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/firestore';
-import 'firebase/compat/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
 
-// IMPORTANT: Replace with your own Firebase project configuration
+
+// FIX: Changed firebase imports to use @firebase scoped packages to resolve module resolution errors.
+import { initializeApp, getApps, getApp } from '@firebase/app';
+import { getFirestore } from '@firebase/firestore';
+import { getAuth } from '@firebase/auth';
+
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBh3m3KMuVVIC53DkKpJaQyjZoRnCOS6iQ",
-  authDomain: "faq1-a8fa2.firebaseapp.com",
-  projectId: "faq1-a8fa2",
-  storageBucket: "faq1-a8fa2.appspot.com",
-  messagingSenderId: "265196948796",
-  appId: "1:265196948796:web:04ab2bc201e171d945a239"
+  apiKey: "AIzaSyCepqfYX3FxHRQRVmd9RbASmkUHBGnbvVE",
+  authDomain: "faq-real.firebaseapp.com",
+  databaseURL: "https://faq-real-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "faq-real",
+  storageBucket: "faq-real.firebasestorage.app",
+  messagingSenderId: "30816639570",
+  appId: "1:30816639570:web:05ad1e97e8d6e7d1471d8b"
 };
 
-firebase.initializeApp(firebaseConfig);
+// Initialize Firebase
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-const db = getFirestore();
-const auth = getAuth();
+
+// Initialize Cloud Firestore and get a reference to the service
+const db = getFirestore(app);
+
+// Initialize Firebase Authentication and get a reference to the service
+const auth = getAuth(app);
 
 export { db, auth };

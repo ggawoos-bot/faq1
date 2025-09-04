@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { FAQ, FAQCreate } from '../types';
 
@@ -43,7 +44,7 @@ const FaqForm: React.FC<FaqFormProps> = ({ onSubmit, existingFaq }) => {
           id="category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white text-gray-900"
           required
         />
       </div>
@@ -54,7 +55,7 @@ const FaqForm: React.FC<FaqFormProps> = ({ onSubmit, existingFaq }) => {
           id="question"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white text-gray-900"
           required
         />
       </div>
@@ -65,7 +66,7 @@ const FaqForm: React.FC<FaqFormProps> = ({ onSubmit, existingFaq }) => {
           rows={5}
           value={answer}
           onChange={(e) => setAnswer(e.target.value)}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white text-gray-900"
           required
         />
       </div>

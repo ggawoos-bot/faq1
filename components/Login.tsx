@@ -1,6 +1,8 @@
 
+
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+// FIX: Changed import to @firebase/auth to resolve module resolution errors.
+import { signInWithEmailAndPassword } from '@firebase/auth';
 import { auth } from '../services/firebase';
 
 const Login: React.FC = () => {
@@ -14,6 +16,7 @@ const Login: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
+      // FIX: Use signInWithEmailAndPassword from modular API.
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
       setError("Failed to sign in. Please check your credentials.");
@@ -35,7 +38,7 @@ const Login: React.FC = () => {
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-900"
             required
           />
         </div>
@@ -46,7 +49,7 @@ const Login: React.FC = () => {
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-900"
             required
           />
         </div>

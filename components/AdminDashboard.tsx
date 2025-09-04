@@ -1,6 +1,8 @@
 
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { collection, getDocs, doc, setDoc, addDoc, updateDoc, deleteDoc, writeBatch, query, where, onSnapshot } from 'firebase/firestore';
+// FIX: Changed import to @firebase/firestore to be consistent and avoid module resolution errors.
+import { collection, getDocs, doc, setDoc, addDoc, updateDoc, deleteDoc, writeBatch, query, where, onSnapshot } from '@firebase/firestore';
 import { db } from '../services/firebase';
 import { FAQ, FAQCreate } from '../types';
 import { FAQ_COLLECTION } from '../constants';
@@ -192,7 +194,7 @@ const AdminDashboard: React.FC = () => {
           placeholder="Search FAQs..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-900"
         />
       </div>
 

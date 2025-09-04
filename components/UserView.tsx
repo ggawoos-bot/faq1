@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { collection, query, getDocs } from 'firebase/firestore';
+// FIX: Changed import to @firebase/firestore to be consistent and avoid module resolution errors.
+import { collection, query, getDocs } from '@firebase/firestore';
 import { db } from '../services/firebase';
 import { FAQ } from '../types';
 import { FAQ_COLLECTION } from '../constants';
@@ -71,7 +72,7 @@ const UserView: React.FC = () => {
           placeholder="Search for a question..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-5 py-3 text-lg border-2 border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
+          className="w-full px-5 py-3 text-lg border-2 border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow bg-white text-gray-900"
         />
       </div>
 

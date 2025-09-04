@@ -1,18 +1,22 @@
 
+
 import React from 'react';
-import { User, signOut } from 'firebase/auth';
+// FIX: Changed import to @firebase/auth to resolve module resolution errors.
+import { signOut, User } from '@firebase/auth';
 import { auth } from '../services/firebase';
 import { View } from '../types';
 
 interface HeaderProps {
   currentView: View;
   setView: (view: View) => void;
+  // FIX: Use User type from modular API.
   user: User | null;
 }
 
 const Header: React.FC<HeaderProps> = ({ currentView, setView, user }) => {
   const handleLogout = async () => {
     try {
+      // FIX: Use signOut() from modular API.
       await signOut(auth);
       setView(View.USER);
     } catch (error) {

@@ -1,6 +1,8 @@
 
+
 import React, { useState, useEffect } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
+// FIX: Changed import to @firebase/auth to resolve module resolution errors.
+import { onAuthStateChanged, User } from '@firebase/auth';
 import { auth } from './services/firebase';
 
 import Header from './components/Header';
@@ -12,10 +14,12 @@ import { View } from './types';
 
 const App: React.FC = () => {
   const [view, setView] = useState<View>(View.USER);
+  // FIX: Use User type from modular API.
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
+    // FIX: Use onAuthStateChanged from modular API.
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setAuthLoading(false);
